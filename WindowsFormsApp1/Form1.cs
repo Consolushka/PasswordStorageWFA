@@ -7,6 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Xml;
+using System.IO;
+using Newtonsoft.Json;
+using ClosedXML.Excel;
 
 namespace WindowsFormsApp1
 {
@@ -100,7 +105,7 @@ namespace WindowsFormsApp1
             public bool TBreadOnly;
             public string TBtext;
 
-            public TB(int x, int y, string text, bool readOnly = false, int width = 95)
+            public TB(int x, int y, string text="", bool readOnly = false, int width = 95)
             {
                 TBx = x;
                 TBy = y;
@@ -124,10 +129,10 @@ namespace WindowsFormsApp1
         //Класс, для создания аккаунта 
         class Acount
         {
-            public string Name;
-            public string Mail;
-            public string Login;
-            public string Password;
+            public string Name { get; set; }
+            public string Mail { get; set; }
+            public string Login { get; set; }
+            public string Password { get; set; }
 
             public Acount(string n,string m,string l,string p)
             {
@@ -137,24 +142,9 @@ namespace WindowsFormsApp1
                 Password = p;
             }
 
-            public Array getAccount()
-            {
-                string[] acount = new string[4];
-                acount[0] = Name;
-                acount[1] = Mail;
-                acount[2] = Login;
-                acount[3] = Password;
-                return acount;
-            }
-
             public void Show()
             {
                 MessageBox.Show($"{Name} {Mail} {Login} {Password}");
-            }
-
-            public string ResouceName()
-            {
-                return Name;
             }
         }
 
@@ -164,11 +154,13 @@ namespace WindowsFormsApp1
         int starterX = 30;
         int marginX = 25;
 
+        CspParameters cspp = new CspParameters();
+
         //Массив Аккаунтов пользователя
         List<Acount> accounts = new List<Acount>();
 
         //Пароль для входа в приложение
-        string pass = "master";
+        public string pass;
 
         public main()
         {
@@ -182,14 +174,16 @@ namespace WindowsFormsApp1
             ClearForm();
 
 
-            List<String> Res = new List<string>();
-            foreach (var item in accounts)
-            {
-                Res.Add(item.ResouceName());
-            }
+            List<String> Names = new List<string>();
 
+                List<Acount> Res = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("acount.json"));
+                foreach (var item in Res)
+                {
+                    Names.Add(Decrypt(item.Name));
+                }
+                MessageBox.Show("null");
             CB cb;
-            cb = new CB(30, mainY, 95, Res);
+            cb = new CB(30, mainY, 95, Names);
             ComboBox Resourses = cb.create();
             this.Controls.Add(Resourses);
             Resourses.SelectedIndexChanged += new EventHandler(Resourses_selectResource);
@@ -225,6 +219,7 @@ namespace WindowsFormsApp1
         //Очищает все созданные нами элементы, кроме менюшки
         public void ClearForm()
         {
+            accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("acount.json"));
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             foreach (TextBox textbox in tbs)
             {
@@ -260,23 +255,46 @@ namespace WindowsFormsApp1
         //Поле ввода пароля автоматически вводит * вместо символов
         private void main_Load(object sender, EventArgs e)
         {
+            List<Acount> js = new List<Acount>();
+            js.Add(new Acount(Encrypt("n"), Encrypt("n"), Encrypt("n"), Encrypt("n")));
+            MessageBox.Show(File.ReadAllText("password.json"));
+            File.WriteAllText("acount.json", JsonConvert.SerializeObject(js));
             menu.Hide();
+            if (File.Exists("password.json"))
+            {
+                accessPassCopy.Dispose();
+                pass = File.ReadAllText("password.json");
+                cspp.KeyContainerName = File.ReadAllText("password.json");
+                accessPass.TextChanged += new EventHandler(accessPass_TextChanged);
+            }
+            else
+            {
+                accessPassCopy.PasswordChar = '*';
+                accessPassCopy.TextChanged += new EventHandler(accessPassCopy_TextChanged);
+            }
             accessPass.PasswordChar = '*';
         }
 
         //Если при вводе главного пароля он совпадает с определнным в программе - пускаем в основное приложение
         private void accessPass_TextChanged(object sender, EventArgs e)
         {
-            if (accessPass.Text == pass)
+            if (accessPass.Text == File.ReadAllText("password.json"))
             {
-                accessPass.Hide();
                 menu.Show();
-
                 FillBasicForm();
             }
         }
 
-
+        private void accessPassCopy_TextChanged(object sender, EventArgs e)
+        {
+            if (accessPassCopy.Text == accessPass.Text)
+            {
+                menu.Show();
+                File.WriteAllText("password.json", accessPass.Text);
+                File.WriteAllText("acount.json", "");
+                FillBasicForm();
+            }
+        }
 
 
         //При выборе какого-то аккаунта, все созданные элементы заполняются данными из соответствующего аккаунта массива, опрделенного в корне приложения
@@ -347,7 +365,21 @@ namespace WindowsFormsApp1
             {
                 values.Add(textbox.Text);
             }
-            accounts.Add(new Acount(values[0], values[1], values[2], values[3]));
+            MessageBox.Show(Encrypt(values[2]));
+
+            /*string JSONData = JsonConvert.SerializeObject(new Acount(values[0], values[1], values[2], values[3]));
+
+            List<Acount> js = new List<Acount>();
+            js.Add(new Acount(values[0], values[1], values[2], values[3]));
+            js.Add(new Acount(values[0], values[1], values[2], values[3]));
+
+            File.WriteAllText("acount.json", JsonConvert.SerializeObject(js));
+
+            JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("acount.json"))[0].Show();
+            File.Delete("acount.json");
+            var ac = JsonConvert.DeserializeObject<Acount>(JSONData);*/
+            accounts.Add(new Acount(Encrypt(values[0]), Encrypt(values[1]), Encrypt(values[2]), Encrypt(values[3])));
+            File.WriteAllText("acount.json", JsonConvert.SerializeObject(accounts));
         }
 
 
@@ -362,7 +394,7 @@ namespace WindowsFormsApp1
             List<String> Res = new List<string>();
             foreach (var item in accounts)
             {
-                Res.Add(item.ResouceName());
+                Res.Add(item.Name);
             }
 
             CB cb;
@@ -411,9 +443,11 @@ namespace WindowsFormsApp1
         {
             List<ComboBox> cb = this.Controls.OfType<ComboBox>().ToList();
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
-            accounts[cb[0].SelectedIndex].Mail = tbs[0].Text;
-            accounts[cb[0].SelectedIndex].Login = tbs[1].Text;
-            accounts[cb[0].SelectedIndex].Password = tbs[2].Text;
+            accounts[cb[0].SelectedIndex].Mail = Encrypt(tbs[0].Text);
+            accounts[cb[0].SelectedIndex].Login = Encrypt(tbs[1].Text);
+            accounts[cb[0].SelectedIndex].Password = Encrypt(tbs[2].Text);
+
+            File.WriteAllText("acount.json", JsonConvert.SerializeObject(accounts));
         }
 
 
@@ -425,6 +459,53 @@ namespace WindowsFormsApp1
         private void получитьДанныеАккаунтаToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FillBasicForm();
+        }
+
+        public string Encrypt(string p)
+        {
+            byte[] byteContent;
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(cspp);
+            byteContent = rsa.Encrypt(toByte(p),false);
+            return toString(byteContent);
+        }
+
+        public string Decrypt(string p)
+        {
+            byte[] byteContent;
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048,cspp);
+            MessageBox.Show(rsa.KeySize.ToString());
+            byteContent = rsa.Decrypt(toByte(p), true);
+            return toString(byteContent);
+        }
+
+        private static string toString(byte[] p)
+        {
+            return Encoding.UTF8.GetString(p);
+        }
+
+        private static byte[] toByte(string p)
+        {
+            return Encoding.UTF8.GetBytes(p);
+        }
+
+        private void учетнаяЗаписьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClearForm();
+
+            TB tb = new TB(270, mainY);
+            TextBox tbNewPassword = tb.create();
+            this.Controls.Add(tbNewPassword);
+
+            BTN btn = new BTN(250, mainY + 50, 95, "Изменить");
+            Button btnChangePass = btn.create();
+            this.Controls.Add(btnChangePass);
+            btnChangePass.Click += new EventHandler(btnChangePass_Click);
+        }
+
+        private void btnChangePass_Click(object sender, EventArgs e)
+        {
+            List < TextBox > tbs= this.Controls.OfType<TextBox>().ToList();
+            File.WriteAllText("password.json", tbs[0].Text);
         }
     }
 }
