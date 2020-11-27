@@ -36,6 +36,7 @@
             this.учетнаяЗаписьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.accessPass = new System.Windows.Forms.TextBox();
             this.accessPassCopy = new System.Windows.Forms.TextBox();
+            this.loginTB = new System.Windows.Forms.TextBox();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -87,7 +88,7 @@
             this.accessPass.Location = new System.Drawing.Point(245, 82);
             this.accessPass.Name = "accessPass";
             this.accessPass.Size = new System.Drawing.Size(241, 28);
-            this.accessPass.TabIndex = 1;
+            this.accessPass.TabIndex = 2;
             this.accessPass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // accessPassCopy
@@ -96,14 +97,24 @@
             this.accessPassCopy.Location = new System.Drawing.Point(245, 118);
             this.accessPassCopy.Name = "accessPassCopy";
             this.accessPassCopy.Size = new System.Drawing.Size(241, 28);
-            this.accessPassCopy.TabIndex = 2;
+            this.accessPassCopy.TabIndex = 3;
             this.accessPassCopy.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // loginTB
+            // 
+            this.loginTB.Font = new System.Drawing.Font("MS Reference Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.loginTB.Location = new System.Drawing.Point(245, 48);
+            this.loginTB.Name = "loginTB";
+            this.loginTB.Size = new System.Drawing.Size(241, 31);
+            this.loginTB.TabIndex = 1;
+            this.loginTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(713, 195);
+            this.Controls.Add(this.loginTB);
             this.Controls.Add(this.accessPassCopy);
             this.Controls.Add(this.accessPass);
             this.Controls.Add(this.menu);
@@ -129,6 +140,7 @@
         private System.Windows.Forms.TextBox accessPass;
         private System.Windows.Forms.TextBox accessPassCopy;
         private System.Windows.Forms.ToolStripMenuItem учетнаяЗаписьToolStripMenuItem;
+        private System.Windows.Forms.TextBox loginTB;
     }
 }
 
