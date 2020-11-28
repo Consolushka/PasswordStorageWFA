@@ -180,7 +180,7 @@ namespace WindowsFormsApp1
             {
 
                 MessageBox.Show("У вас еще нет аккаунтов");
-                Names.Add("Пусто");
+                cb = new CB(30, mainY, 150, Names);
             }
             else
             {
@@ -188,8 +188,8 @@ namespace WindowsFormsApp1
                 {
                     Names.Add(Decrypt(item.Name, pass));
                 }
+                cb = new CB(30, mainY, 150, Names);
             }
-            cb = new CB(30, mainY, 150, Names);
             ComboBox Resourses = cb.create();
             this.Controls.Add(Resourses);
             Resourses.SelectedIndexChanged += new EventHandler(Resourses_selectResource);
@@ -229,7 +229,7 @@ namespace WindowsFormsApp1
         //Очищает все созданные нами элементы, кроме менюшки
         public void ClearForm()
         {
-            accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("acount.json"));
+            accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("accounts.json"));
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             foreach (TextBox textbox in tbs)
             {
@@ -266,22 +266,23 @@ namespace WindowsFormsApp1
         private void main_Load(object sender, EventArgs e)
         {
             menu.Hide();
-            if (File.Exists("password.json"))
+            if (File.Exists("login.json"))
             {
-                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("password.json"));
+                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("login.json"));
                 string login = Decrypt(acc.Login, acc.Password);
-                MessageBox.Show(login);
                 string password = Decrypt(acc.Password, login);
-                MessageBox.Show(login, password);
                 pass = password;
                 accessPassCopy.Dispose();
                 loginTB.Dispose();
-                accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("acount.json"));
+                label1.Dispose();
+                label2.Dispose();
+                label3.Dispose();
+                accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("accounts.json"));
                 accessPass.TextChanged += new EventHandler(accessPass_TextChanged);
             }
             else
             {
-                File.WriteAllText("acount.json", "");
+                File.WriteAllText("accounts.json", "");
                 accessPassCopy.PasswordChar = '*';
                 accessPassCopy.TextChanged += new EventHandler(accessPassCopy_TextChanged);
             }
@@ -306,8 +307,9 @@ namespace WindowsFormsApp1
                 string password = Encrypt(accessPass.Text, loginTB.Text);
                 string login = Encrypt(loginTB.Text, password);
                 Acount acc = new Acount("", "", login, password);
-                File.WriteAllText("password.json", JsonConvert.SerializeObject(acc));
-                File.WriteAllText("acount.json", "");
+                File.WriteAllText("login.json", JsonConvert.SerializeObject(acc));
+                File.WriteAllText("accounts.json", "");
+                pass = accessPass.Text;
                 FillBasicForm();
             }
         }
@@ -394,7 +396,7 @@ namespace WindowsFormsApp1
                 accounts = new List<Acount>();
             }
             accounts.Add(new Acount(Encrypt(values[0],pass), Encrypt(values[1], pass), Encrypt(values[2], pass), Encrypt(values[3], pass)));
-            File.WriteAllText("acount.json", JsonConvert.SerializeObject(accounts));
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
 
         }
 
@@ -477,7 +479,7 @@ namespace WindowsFormsApp1
             accounts[cb[0].SelectedIndex].Mail = Encrypt(tbs[0].Text,pass);
             accounts[cb[0].SelectedIndex].Login = Encrypt(tbs[1].Text, pass);
             accounts[cb[0].SelectedIndex].Password = Encrypt(tbs[2].Text, pass);
-            File.WriteAllText("acount.json", JsonConvert.SerializeObject(accounts));
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
             MessageBox.Show("Данные Ресурса <"+ cb[0].SelectedItem+ "> Изменены");
         }
 
@@ -485,16 +487,18 @@ namespace WindowsFormsApp1
         {
             List<ComboBox> cb = this.Controls.OfType<ComboBox>().ToList();
             accounts.RemoveAt(cb[0].SelectedIndex);
-            File.WriteAllText("acount.json", JsonConvert.SerializeObject(accounts));
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
             MessageBox.Show("Данные Ресурса <" + cb[0].SelectedItem + "> Удалены");
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             foreach(TextBox tb in tbs)
             {
                 tb.Text = "";
             }
-            MessageBox.Show(cb[0].SelectedIndex.ToString());
             cb[0].Items.RemoveAt(cb[0].SelectedIndex);
         }
+
+
+
 
         //При выборе вкладки получить Данные Аккаунта 
         //Форма заполняется Также как и начальная стадия формы
@@ -503,19 +507,73 @@ namespace WindowsFormsApp1
             FillBasicForm();
         }
 
+
+
+
+
+        private void учетнаяЗаписьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClearForm();
+
+            TB tb = new TB(310, mainY - 50, "", false, 150);
+            TextBox tbNewPassword = tb.create();
+            tbNewPassword.PasswordChar = '*';
+            tbNewPassword.TextAlign = HorizontalAlignment.Center;
+            this.Controls.Add(tbNewPassword);
+            tb = new TB(310, mainY - 25, "", false, 150);
+            TextBox tbNewPassCopy = tb.create();
+            tbNewPassCopy.PasswordChar = '*';
+            tbNewPassCopy.TextAlign = HorizontalAlignment.Center;
+            this.Controls.Add(tbNewPassCopy);
+
+            BTN btn = new BTN(310, mainY + 25, 150, "Изменить");
+            Button btnChangePass = btn.create();
+            this.Controls.Add(btnChangePass);
+            btnChangePass.Click += new EventHandler(btnChangePass_Click);
+        }
+
+        private void btnChangePass_Click(object sender, EventArgs e)
+        {
+            List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
+            if (tbs[0].Text == tbs[1].Text)
+            {
+                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("login.json"));
+                string login = Decrypt(acc.Login, acc.Password);
+                string password = Decrypt(acc.Password, login);
+                acc.Password = Encrypt(tbs[0].Text, login);
+                acc.Login = Encrypt(login, acc.Password);
+                File.WriteAllText("login.json", JsonConvert.SerializeObject(acc));
+                RewriteAccs(tbs[0].Text);
+                pass = tbs[0].Text;
+                MessageBox.Show("Пароль изменен!");
+            }
+            else
+            {
+                MessageBox.Show("Введеные пароли не совпадают!");
+            }
+        }
+
+
+        public void RewriteAccs(string newPass)
+        {
+            foreach(Acount acc in accounts)
+            {
+                acc.Login = Encrypt(Decrypt(acc.Login, pass), newPass);
+                acc.Name = Encrypt(Decrypt(acc.Name, pass), newPass);
+                acc.Password= Encrypt(Decrypt(acc.Password, pass), newPass);
+                acc.Mail= Encrypt(Decrypt(acc.Mail, pass), newPass);
+            }
+            File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
+        }
+
+
         ////// Шифрует строку value
-        /// Строка которую необходимо зашифровать
-        /// Ключ шифрования
         public static string Encrypt(string str, string keyCrypt)
         {
             return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(str), keyCrypt));
         }
 
         ////// Расшифроывает данные из строки value
-        /// Зашифрованая строка
-        /// Ключ шифрования
-        /// Возвращает null, если прочесть данные не удалось
-
         public static string Decrypt(string str, string keyCrypt)
         {
             string Result;
@@ -596,48 +654,6 @@ namespace WindowsFormsApp1
 
             return new CryptoStream(ms, ct, CryptoStreamMode.Read);
 
-        }
-
-        private void учетнаяЗаписьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClearForm();
-
-            TB tb = new TB(310, mainY-50,"",false,150);
-            TextBox tbNewPassword = tb.create();
-            tbNewPassword.PasswordChar = '*';
-            tbNewPassword.TextAlign = HorizontalAlignment.Center;
-            this.Controls.Add(tbNewPassword);
-            tb = new TB(310, mainY - 25,"",false,150);
-            TextBox tbNewPassCopy = tb.create();
-            tbNewPassCopy.PasswordChar = '*';
-            tbNewPassCopy.TextAlign = HorizontalAlignment.Center;
-            this.Controls.Add(tbNewPassCopy);
-
-            BTN btn = new BTN(310, mainY+25, 150, "Изменить");
-            Button btnChangePass = btn.create();
-            this.Controls.Add(btnChangePass);
-            btnChangePass.Click += new EventHandler(btnChangePass_Click);
-        }
-
-        private void btnChangePass_Click(object sender, EventArgs e)
-        {
-            List < TextBox > tbs= this.Controls.OfType<TextBox>().ToList();
-            if (tbs[0].Text == tbs[1].Text)
-            {
-                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("password.json"));
-                string login = Decrypt(acc.Login, acc.Password);
-                string password = Decrypt(acc.Password, login);
-                pass = tbs[0].Text;
-                MessageBox.Show(login);
-                acc.Password = Encrypt(tbs[0].Text,login);
-                acc.Login = Encrypt(login, acc.Password);
-                File.WriteAllText("password.json", JsonConvert.SerializeObject(acc));
-                MessageBox.Show("Пароль изменен!");
-            }
-            else
-            {
-                MessageBox.Show("Введеные пароли не совпадают!");
-            }
         }
     }
 }
