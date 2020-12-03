@@ -11,10 +11,14 @@ using System.Security.Cryptography;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace WindowsFormsApp1
+namespace WindowsFormsApp2
 {
     public partial class main : Form
     {
+        public main()
+        {
+            InitializeComponent();
+        }
 
         //Несколько Классов для упрощения создания Элементов Формы
         class CB
@@ -24,7 +28,7 @@ namespace WindowsFormsApp1
             public int CBwidth;
             public List<String> CBitems;
 
-            public CB(int x, int y, int width,List<String> items)
+            public CB(int x, int y, int width, List<String> items)
             {
                 CBx = x;
                 CBy = y;
@@ -37,7 +41,7 @@ namespace WindowsFormsApp1
                 ComboBox cb = new ComboBox();
                 cb.Location = new Point(CBx, CBy);
                 cb.Width = CBwidth;
-                foreach(string item in CBitems)
+                foreach (string item in CBitems)
                 {
                     cb.Items.Add(item);
                 }
@@ -77,7 +81,7 @@ namespace WindowsFormsApp1
             public int BTNwidth;
             public string BTNtext;
 
-            public BTN(int x,int y,int width,string text)
+            public BTN(int x, int y, int width, string text)
             {
                 BTNx = x;
                 BTNy = y;
@@ -103,7 +107,7 @@ namespace WindowsFormsApp1
             public bool TBreadOnly;
             public string TBtext;
 
-            public TB(int x, int y, string text="", bool readOnly = false, int width = 95)
+            public TB(int x, int y, string text = "", bool readOnly = false, int width = 95)
             {
                 TBx = x;
                 TBy = y;
@@ -125,14 +129,14 @@ namespace WindowsFormsApp1
         }
 
         //Класс, для создания аккаунта 
-        class Acount
+        class Account
         {
             public string Name { get; set; }
             public string Mail { get; set; }
             public string Login { get; set; }
             public string Password { get; set; }
 
-            public Acount(string n,string m,string l,string p)
+            public Account(string n, string m, string l, string p)
             {
                 Name = n;
                 Mail = m;
@@ -155,15 +159,10 @@ namespace WindowsFormsApp1
         CspParameters cspp = new CspParameters();
 
         //Массив Аккаунтов пользователя
-        List<Acount> accounts = new List<Acount>();
+        List<Account> accounts = new List<Account>();
 
         //Пароль для входа в приложение
         public string pass;
-
-        public main()
-        {
-            InitializeComponent();
-        }
 
         //Базовое заполнение Формы (State - просмотр паролей)
         //Создаются некоторые элементы (Combobox, Textbox, Label), которые будут заполняться нужными данными
@@ -177,7 +176,7 @@ namespace WindowsFormsApp1
             if (accounts == null)
             {
 
-                MessageBox.Show("У вас еще нет аккаунтов");
+                MessageBox.Show("You have got no accounts yet");
                 cb = new CB(30, mainY, 150, Names);
             }
             else
@@ -193,25 +192,25 @@ namespace WindowsFormsApp1
             Resourses.SelectedIndexChanged += new EventHandler(Resourses_selectResource);
 
             Lab lb;
-            lb = new Lab(30, labelsY, "Название Ресурса", 150);
+            lb = new Lab(30, labelsY, "Resource Name", 150);
             Label lbRes = lb.create();
             this.Controls.Add(lbRes);
 
-            lb = new Lab(200, labelsY, "Адрес Электронной почты", 180);
+            lb = new Lab(200, labelsY, "Mail", 180);
             Label lbMail = lb.create();
             this.Controls.Add(lbMail);
 
-            lb = new Lab(410, labelsY, "Логин");
+            lb = new Lab(410, labelsY, "Login");
             Label lbLogin = lb.create();
             this.Controls.Add(lbLogin);
 
-            lb = new Lab(535, labelsY, "Пароль");
+            lb = new Lab(535, labelsY, "Password");
             Label lbPassword = lb.create();
             this.Controls.Add(lbPassword);
 
 
             TB tb;
-            tb = new TB(200, mainY, "mail@mail.com", true,180);
+            tb = new TB(200, mainY, "mail@mail.com", true, 180);
             TextBox tbMail = tb.create();
             this.Controls.Add(tbMail);
 
@@ -221,13 +220,13 @@ namespace WindowsFormsApp1
             tb = new TB(535, mainY, "Password", true);
             TextBox tbPassword = tb.create();
             this.Controls.Add(tbPassword);
-            this.Text = "Хранилище паролей";
+            this.Text = "Password Storage";
         }
 
         //Очищает все созданные нами элементы, кроме менюшки
         public void ClearForm()
         {
-            accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("accounts.json"));
+            accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText("accounts.json"));
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             foreach (TextBox textbox in tbs)
             {
@@ -254,19 +253,12 @@ namespace WindowsFormsApp1
             }
         }
 
-
-
-
-
-
-        //При загрузке нашего приложения инстантно скрывается меню
-        //Поле ввода пароля автоматически вводит * вместо символов
         private void main_Load(object sender, EventArgs e)
         {
             menu.Hide();
             if (File.Exists("login.json"))
             {
-                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("login.json"));
+                Account acc = JsonConvert.DeserializeObject<Account>(File.ReadAllText("login.json"));
                 string login = Decrypt(acc.Login, acc.Password);
                 string password = Decrypt(acc.Password, login);
                 pass = password;
@@ -275,7 +267,7 @@ namespace WindowsFormsApp1
                 label1.Dispose();
                 label2.Dispose();
                 label3.Dispose();
-                accounts = JsonConvert.DeserializeObject<List<Acount>>(File.ReadAllText("accounts.json"));
+                accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText("accounts.json"));
                 accessPass.TextChanged += new EventHandler(accessPass_TextChanged);
             }
             else
@@ -299,12 +291,12 @@ namespace WindowsFormsApp1
 
         private void accessPassCopy_TextChanged(object sender, EventArgs e)
         {
-            if (accessPassCopy.Text == accessPass.Text && loginTB.Text!="")
+            if (accessPassCopy.Text == accessPass.Text && loginTB.Text != "")
             {
                 menu.Show();
                 string password = Encrypt(accessPass.Text, loginTB.Text);
                 string login = Encrypt(loginTB.Text, password);
-                Acount acc = new Acount("", "", login, password);
+                Account acc = new Account("", "", login, password);
                 File.WriteAllText("login.json", JsonConvert.SerializeObject(acc));
                 File.WriteAllText("accounts.json", "");
                 pass = accessPass.Text;
@@ -316,18 +308,11 @@ namespace WindowsFormsApp1
         //При выборе какого-то аккаунта, все созданные элементы заполняются данными из соответствующего аккаунта массива, опрделенного в корне приложения
         private void Resourses_selectResource(object sender, EventArgs e)
         {
-            if(accounts == null)
-            {
-                MessageBox.Show("Это была просто заглушка :):):):)");
-            }
-            else
-            {
                 List<ComboBox> cb = this.Controls.OfType<ComboBox>().ToList();
                 List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
                 tbs[0].Text = Decrypt(accounts[cb[0].SelectedIndex].Mail, pass);
                 tbs[1].Text = Decrypt(accounts[cb[0].SelectedIndex].Login, pass);
                 tbs[2].Text = Decrypt(accounts[cb[0].SelectedIndex].Password, pass);
-            }
         }
 
 
@@ -335,53 +320,12 @@ namespace WindowsFormsApp1
 
         //При выборе вкладки "Добавить Аккаунт"
         //Создаются немного другие Элементы формы
-        private void добавитьАккаунтToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClearForm();
 
-            Lab lb;
-            lb = new Lab(30, labelsY, "Введите Название ресурса", 150);
-            Label lbAddResource = lb.create();
-            this.Controls.Add(lbAddResource);
-            lb = new Lab(190, labelsY, "Введите Адрес Электронной почты", 95);
-            Label lbAddMail = lb.create();
-            this.Controls.Add(lbAddMail);
-            lb = new Lab(300, labelsY, "Введите Логин", 95);
-            Label lbAddLogin = lb.create();
-            this.Controls.Add(lbAddLogin);
-            lb = new Lab(420, labelsY, "Введите Пароль", 95);
-            Label lbAddPassword= lb.create();
-            this.Controls.Add(lbAddPassword);
-
-
-            TB tb;
-            tb = new TB(30, mainY, "",false,150);
-            TextBox tbAddResource = tb.create();
-            this.Controls.Add(tbAddResource);
-
-            tb = new TB(190, mainY, "");
-            TextBox tbAddMail = tb.create();
-            this.Controls.Add(tbAddMail);
-
-            tb = new TB(300, mainY, "");
-            TextBox tbAddLogin = tb.create();
-            this.Controls.Add(tbAddLogin);
-
-            tb = new TB(420, mainY, "");
-            TextBox tbAddPassword = tb.create();
-            this.Controls.Add(tbAddPassword);
-
-            BTN btn;
-            btn = new BTN(540, mainY, 95, "Добавить");
-            Button btnAdd= btn.create();
-            this.Controls.Add(btnAdd);
-            btnAdd.Click += new EventHandler(btnAdd_Click);
-        }
 
         //При добавлении Аккаунта, формируется новый объект класса Acount и добавляется в массив аккаунтов
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Добавленно!");
+            MessageBox.Show("Added!");
             List<string> values = new List<string>();
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             foreach (TextBox textbox in tbs)
@@ -391,9 +335,9 @@ namespace WindowsFormsApp1
             }
             if (accounts == null)
             {
-                accounts = new List<Acount>();
+                accounts = new List<Account>();
             }
-            accounts.Add(new Acount(Encrypt(values[0],pass), Encrypt(values[1], pass), Encrypt(values[2], pass), Encrypt(values[3], pass)));
+            accounts.Add(new Account(Encrypt(values[0], pass), Encrypt(values[1], pass), Encrypt(values[2], pass), Encrypt(values[3], pass)));
             File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
 
         }
@@ -403,70 +347,6 @@ namespace WindowsFormsApp1
 
         //При выборе вкладки "Изменить Данные Аккаунта"
         //Создаются нужные нам элементы формы
-        private void изменитьДанныеАккаунтаToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClearForm();
-
-
-            List<String> Names = new List<string>();
-            if (accounts == null)
-            {
-
-                MessageBox.Show("У вас еще нет аккаунтов");
-                Names.Add("");
-            }
-            else
-            {
-                foreach (var item in accounts)
-                {
-                    Names.Add(Decrypt(item.Name,pass));
-                }
-            }
-
-            CB cb;
-            cb = new CB(30, mainY, 95, Names);
-            ComboBox Resourses = cb.create();
-            Resourses.SelectedIndexChanged += new EventHandler(Resourses_selectResource);
-            this.Controls.Add(Resourses);
-
-            Lab lb;
-            lb = new Lab(150, labelsY, "Адрес Электронной почты", 95);
-            Label lbMail = lb.create();
-            this.Controls.Add(lbMail);
-
-            lb = new Lab(270, labelsY, "Логин");
-            Label lbLogin = lb.create();
-            this.Controls.Add(lbLogin);
-
-            lb = new Lab(390, labelsY, "Пароль");
-            Label lbPassword = lb.create();
-            this.Controls.Add(lbPassword);
-
-
-            TB tb;
-            tb = new TB(150, mainY, "mail@mail.com");
-            TextBox tbMail = tb.create();
-            this.Controls.Add(tbMail);
-
-            tb = new TB(270, mainY, "Login");
-            TextBox tbLogin = tb.create();
-            this.Controls.Add(tbLogin);
-
-            tb = new TB(390, mainY, "Password");
-            TextBox tbPassword = tb.create();
-            this.Controls.Add(tbPassword);
-
-            BTN btn;
-            btn = new BTN(500, mainY, 95, "Изменить");
-            Button btnChange= btn.create();
-            btnChange.Click += new EventHandler(btnChange_Click);
-            this.Controls.Add(btnChange);
-            btn = new BTN(610, mainY, 95, "Удалить");
-            Button btnRemove = btn.create();
-            this.Controls.Add(btnRemove);
-            btnRemove.Click += new EventHandler(btnRemove_Click);
-            this.Text = "Хранилище паролей";
-        }
 
         //При изменении данных об аккаунте, соответствующий объект массива перезаписывается в соответствии введенными в поля данными
         private void btnChange_Click(object sender, EventArgs e)
@@ -474,11 +354,11 @@ namespace WindowsFormsApp1
             List<ComboBox> cb = this.Controls.OfType<ComboBox>().ToList();
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
 
-            accounts[cb[0].SelectedIndex].Mail = Encrypt(tbs[0].Text,pass);
+            accounts[cb[0].SelectedIndex].Mail = Encrypt(tbs[0].Text, pass);
             accounts[cb[0].SelectedIndex].Login = Encrypt(tbs[1].Text, pass);
             accounts[cb[0].SelectedIndex].Password = Encrypt(tbs[2].Text, pass);
             File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
-            MessageBox.Show("Данные Ресурса <"+ cb[0].SelectedItem+ "> Изменены");
+            MessageBox.Show("Data Of <" + cb[0].SelectedItem + "> has been Changed");
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -486,9 +366,9 @@ namespace WindowsFormsApp1
             List<ComboBox> cb = this.Controls.OfType<ComboBox>().ToList();
             accounts.RemoveAt(cb[0].SelectedIndex);
             File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
-            MessageBox.Show("Данные Ресурса <" + cb[0].SelectedItem + "> Удалены");
+            MessageBox.Show("Data of <" + cb[0].SelectedItem + "> has been Removed");
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
-            foreach(TextBox tb in tbs)
+            foreach (TextBox tb in tbs)
             {
                 tb.Text = "";
             }
@@ -500,42 +380,18 @@ namespace WindowsFormsApp1
 
         //При выборе вкладки получить Данные Аккаунта 
         //Форма заполняется Также как и начальная стадия формы
-        private void получитьДанныеАккаунтаToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FillBasicForm();
-        }
 
 
 
 
 
-        private void учетнаяЗаписьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClearForm();
-
-            TB tb = new TB(310, mainY - 50, "", false, 150);
-            TextBox tbNewPassword = tb.create();
-            tbNewPassword.PasswordChar = '*';
-            tbNewPassword.TextAlign = HorizontalAlignment.Center;
-            this.Controls.Add(tbNewPassword);
-            tb = new TB(310, mainY - 25, "", false, 150);
-            TextBox tbNewPassCopy = tb.create();
-            tbNewPassCopy.PasswordChar = '*';
-            tbNewPassCopy.TextAlign = HorizontalAlignment.Center;
-            this.Controls.Add(tbNewPassCopy);
-
-            BTN btn = new BTN(310, mainY + 25, 150, "Изменить");
-            Button btnChangePass = btn.create();
-            this.Controls.Add(btnChangePass);
-            btnChangePass.Click += new EventHandler(btnChangePass_Click);
-        }
 
         private void btnChangePass_Click(object sender, EventArgs e)
         {
             List<TextBox> tbs = this.Controls.OfType<TextBox>().ToList();
             if (tbs[0].Text == tbs[1].Text)
             {
-                Acount acc = JsonConvert.DeserializeObject<Acount>(File.ReadAllText("login.json"));
+                Account acc = JsonConvert.DeserializeObject<Account>(File.ReadAllText("login.json"));
                 string login = Decrypt(acc.Login, acc.Password);
                 string password = Decrypt(acc.Password, login);
                 acc.Password = Encrypt(tbs[0].Text, login);
@@ -543,29 +399,27 @@ namespace WindowsFormsApp1
                 File.WriteAllText("login.json", JsonConvert.SerializeObject(acc));
                 RewriteAccs(tbs[0].Text);
                 pass = tbs[0].Text;
-                MessageBox.Show("Пароль изменен!");
+                MessageBox.Show("Password is Changed!");
             }
             else
             {
-                MessageBox.Show("Введеные пароли не совпадают!");
+                MessageBox.Show("There password Doesn't Match!");
             }
         }
 
 
         public void RewriteAccs(string newPass)
         {
-            foreach(Acount acc in accounts)
+            foreach (Account acc in accounts)
             {
                 acc.Login = Encrypt(Decrypt(acc.Login, pass), newPass);
                 acc.Name = Encrypt(Decrypt(acc.Name, pass), newPass);
-                acc.Password= Encrypt(Decrypt(acc.Password, pass), newPass);
-                acc.Mail= Encrypt(Decrypt(acc.Mail, pass), newPass);
+                acc.Password = Encrypt(Decrypt(acc.Password, pass), newPass);
+                acc.Mail = Encrypt(Decrypt(acc.Mail, pass), newPass);
             }
             File.WriteAllText("accounts.json", JsonConvert.SerializeObject(accounts));
         }
 
-
-        ////// Шифрует строку value
         public static string Encrypt(string str, string keyCrypt)
         {
             return Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(str), keyCrypt));
@@ -652,6 +506,142 @@ namespace WindowsFormsApp1
 
             return new CryptoStream(ms, ct, CryptoStreamMode.Read);
 
+        }
+
+        private void addAccMenu_Click(object sender, EventArgs e)
+        {
+            ClearForm();
+
+            Lab lb;
+            lb = new Lab(30, labelsY, "Enter Resource Name", 150);
+            Label lbAddResource = lb.create();
+            this.Controls.Add(lbAddResource);
+            lb = new Lab(190, labelsY, "Enter Mail", 95);
+            Label lbAddMail = lb.create();
+            this.Controls.Add(lbAddMail);
+            lb = new Lab(300, labelsY, "Enter Login", 95);
+            Label lbAddLogin = lb.create();
+            this.Controls.Add(lbAddLogin);
+            lb = new Lab(420, labelsY, "Enter Password", 95);
+            Label lbAddPassword = lb.create();
+            this.Controls.Add(lbAddPassword);
+
+
+            TB tb;
+            tb = new TB(30, mainY, "", false, 150);
+            TextBox tbAddResource = tb.create();
+            this.Controls.Add(tbAddResource);
+
+            tb = new TB(190, mainY, "");
+            TextBox tbAddMail = tb.create();
+            this.Controls.Add(tbAddMail);
+
+            tb = new TB(300, mainY, "");
+            TextBox tbAddLogin = tb.create();
+            this.Controls.Add(tbAddLogin);
+
+            tb = new TB(420, mainY, "");
+            TextBox tbAddPassword = tb.create();
+            this.Controls.Add(tbAddPassword);
+
+            BTN btn;
+            btn = new BTN(540, mainY, 95, "Add");
+            Button btnAdd = btn.create();
+            this.Controls.Add(btnAdd);
+            btnAdd.Click += new EventHandler(btnAdd_Click);
+        }
+
+        private void AccPasswordStorageMenu_Click(object sender, EventArgs e)
+        {
+
+            ClearForm();
+
+            TB tb = new TB(310, mainY - 50, "", false, 150);
+            TextBox tbNewPassword = tb.create();
+            tbNewPassword.PasswordChar = '*';
+            tbNewPassword.TextAlign = HorizontalAlignment.Center;
+            this.Controls.Add(tbNewPassword);
+            tb = new TB(310, mainY - 25, "", false, 150);
+            TextBox tbNewPassCopy = tb.create();
+            tbNewPassCopy.PasswordChar = '*';
+            tbNewPassCopy.TextAlign = HorizontalAlignment.Center;
+            this.Controls.Add(tbNewPassCopy);
+
+            BTN btn = new BTN(310, mainY + 25, 150, "Change");
+            Button btnChangePass = btn.create();
+            this.Controls.Add(btnChangePass);
+            btnChangePass.Click += new EventHandler(btnChangePass_Click);
+        }
+
+        private void GetAccDataMenu_Click(object sender, EventArgs e)
+        {
+            FillBasicForm();
+        }
+
+        private void ChangeAccDataMenu_Click(object sender, EventArgs e)
+        {
+
+            ClearForm();
+
+
+            List<String> Names = new List<string>();
+            if (accounts == null)
+            {
+
+                MessageBox.Show("You have not accounts yet");
+                Names.Add("");
+            }
+            else
+            {
+                foreach (var item in accounts)
+                {
+                    Names.Add(Decrypt(item.Name, pass));
+                }
+            }
+
+            CB cb;
+            cb = new CB(30, mainY, 95, Names);
+            ComboBox Resourses = cb.create();
+            Resourses.SelectedIndexChanged += new EventHandler(Resourses_selectResource);
+            this.Controls.Add(Resourses);
+
+            Lab lb;
+            lb = new Lab(150, labelsY, "Mail", 95);
+            Label lbMail = lb.create();
+            this.Controls.Add(lbMail);
+
+            lb = new Lab(270, labelsY, "Login");
+            Label lbLogin = lb.create();
+            this.Controls.Add(lbLogin);
+
+            lb = new Lab(390, labelsY, "Password");
+            Label lbPassword = lb.create();
+            this.Controls.Add(lbPassword);
+
+
+            TB tb;
+            tb = new TB(150, mainY, "mail@mail.com");
+            TextBox tbMail = tb.create();
+            this.Controls.Add(tbMail);
+
+            tb = new TB(270, mainY, "Login");
+            TextBox tbLogin = tb.create();
+            this.Controls.Add(tbLogin);
+
+            tb = new TB(390, mainY, "Password");
+            TextBox tbPassword = tb.create();
+            this.Controls.Add(tbPassword);
+
+            BTN btn;
+            btn = new BTN(500, mainY, 95, "Change");
+            Button btnChange = btn.create();
+            btnChange.Click += new EventHandler(btnChange_Click);
+            this.Controls.Add(btnChange);
+            btn = new BTN(610, mainY, 95, "Remove");
+            Button btnRemove = btn.create();
+            this.Controls.Add(btnRemove);
+            btnRemove.Click += new EventHandler(btnRemove_Click);
+            this.Text = "Password Storage";
         }
     }
 }
