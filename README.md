@@ -1,7 +1,7 @@
 # PasswordStorageWFA
 Passwords Storage in Windows Forms Application
 <h2>Application works only on Windows</h2>
-<h2>To Tun app on your Machine You need to :</h2>
+<h2>To Run app on your Machine You need to :</h2>
   <ul>
     <li>Enter Folder "Setup"</li>
     <li>Download Version you need (EN or RU)</li>
