@@ -44,7 +44,7 @@ namespace WindowsFormsApp1
                 return cb;
             }
         }
-
+        
         class Lab
         {
             public int Labx;
